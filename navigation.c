@@ -24,6 +24,9 @@ struct Target{
     struct VEL V;
 };
 
+DBL interceptEqn(DBL time,DBL x,DBL y, DBL z, DBL vx, DBL vy, DBL vz,DBL V0){
+    return (2*((x*vx)+(y*vy)+(z*vz))*time)+(pow(vx,2)+(pow(vy,2)+pow(vz,2)-(g)*(z)-V0)*pow(time,2))-((g*vz)*pow(time,3))+((0.25)*pow(g,2)*pow(time,4)) == (-1)*(pow(x,2)+pow(y,2)+pow(z,2));
+}
 
 DBL distance(DBL X1,DBL X2, DBL Y1, DBL Y2){
     return sqrt(
@@ -35,7 +38,7 @@ DBL distance(DBL X1,DBL X2, DBL Y1, DBL Y2){
 int main(int A_C, char* A_G[]){
     srand(time(NULL));
     double t = (int)rand()%(5-2+1)+2;
-    if (A_C != 8){
+    if (A_C != 10){
         printf("Needed 7 args, got %i instead. Try again.\n",A_C);
         exit(EXIT_FAILURE);
      }
@@ -61,6 +64,12 @@ int main(int A_C, char* A_G[]){
     DBL targetX = ((MINFO->P_1.x1+MINFO->P_2.x2)/2)+((MINFO->V.vx)*t);
     DBL targetY = ((MINFO->P_1.y1+MINFO->P_2.y2)/2)+((MINFO->V.vy)*t);
     DBL targetZ = ((MINFO->P_1.z1+MINFO->P_2.z2)/2)+((MINFO->V.vz)*t)-((0.5)*(g)*(pow(t,2)));
-
+    DBL avX = (MINFO->P_1.x1+MINFO->P_2.x2)/2;
+    DBL axY = (MINFO->P_1.y1+MINFO->P_2.y2)/2;
+    DBL axZ = (MINFO->P_1.z1+MINFO->P_2.z2)/2;
+    for(int T = (int)ceil(t); T < 4000 ; T++){
+        int value = interceptEqn(T,avX, axY, axZ, MINFO->V.vx, MINFO->V.vy, MINFO->V.vz, sqrt(pow(MINFO->V.vx,2)+pow(MINFO->V.vy,2)+pow(MINFO->V.vz,2)));
+        printf("T=%i\tValue=%i\n",T,value);
+    }     
     r0;
 }
