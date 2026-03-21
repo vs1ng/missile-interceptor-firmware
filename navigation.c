@@ -24,8 +24,13 @@ struct Target{
     struct VEL V;
 };
 
-DBL interceptEqn(DBL time,DBL x,DBL y, DBL z, DBL vx, DBL vy, DBL vz,DBL V0){
-    return (2*((x*vx)+(y*vy)+(z*vz))*time)+(pow(vx,2)+(pow(vy,2)+pow(vz,2)-(g)*(z)-V0)*pow(time,2))-((g*vz)*pow(time,3))+((0.25)*pow(g,2)*pow(time,4)) == (-1)*(pow(x,2)+pow(y,2)+pow(z,2));
+DBL interceptEqn(DBL t, DBL x, DBL y, DBL z, DBL vx, DBL vy, DBL vz, DBL V0) {
+    DBL term1 = pow(x + vx*t, 2);
+    DBL term2 = pow(y + vy*t, 2);
+    DBL term3 = pow(z + vz*t - 0.5*g*t*t, 2);
+    DBL term4 = V0*V0 * t*t;
+    
+    return term1 + term2 + term3 - term4;
 }
 
 DBL distance(DBL X1,DBL X2, DBL Y1, DBL Y2){
@@ -67,9 +72,17 @@ int main(int A_C, char* A_G[]){
     DBL avX = (MINFO->P_1.x1+MINFO->P_2.x2)/2;
     DBL axY = (MINFO->P_1.y1+MINFO->P_2.y2)/2;
     DBL axZ = (MINFO->P_1.z1+MINFO->P_2.z2)/2;
-    for(int T = (int)ceil(t); T < 4000 ; T++){
-        int value = interceptEqn(T,avX, axY, axZ, MINFO->V.vx, MINFO->V.vy, MINFO->V.vz, sqrt(pow(MINFO->V.vx,2)+pow(MINFO->V.vy,2)+pow(MINFO->V.vz,2)));
-        printf("T=%i\tValue=%i\n",T,value);
+    for(int T = (int)ceil(t); T < 40 ; T++){
+        DBL value = interceptEqn(T,avX, axY, axZ, MINFO->V.vx, MINFO->V.vy, MINFO->V.vz, sqrt(pow(MINFO->V.vx,2)+pow(MINFO->V.vy,2)+pow(MINFO->V.vz,2)));
+        printf("T=%i\tValue=%f\n",T,value);
+        if(value > 0){
+            puts("FOUND +VE!!");
+            for(DBL t_2 = T-1;t_2 < T+1;t_2+=0.1){
+                DBL value_2 = interceptEqn(t_2,avX, axY, axZ, MINFO->V.vx, MINFO->V.vy, MINFO->V.vz, sqrt(pow(MINFO->V.vx,2)+pow(MINFO->V.vy,2)+pow(MINFO->V.vz,2)));
+                printf("t_2=%f\tValue=%f\n",t_2,value_2);
+            }
+            exit(EXIT_SUCCESS);
+        }
     }     
     r0;
 }
