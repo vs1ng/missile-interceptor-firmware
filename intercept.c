@@ -9,6 +9,9 @@ typedef const double ADBL;
 
 ADBL g = 9.81;
 ADBL obt = 0.5;
+ADBL mass0 = 90; 
+ADBL fuelBurnRT = 2.3;
+char burnTime = 5;
 
 struct TPosition{
     DBL XI, YI, ZI;
@@ -142,13 +145,74 @@ int main(int ARGC, char* ARG[]){
         "mulsd %%xmm3, %%xmm1\n\t"
         "mulsd %%xmm3, %%xmm2\n\t"
         "movsd %%xmm0, %[VIX]\n\t"
-        "movsd %%xmm0, %[VIY]\n\t"
-        "movsd %%xmm0, %[VIZ]\n\t"
+        "movsd %%xmm1, %[VIY]\n\t"
+        "movsd %%xmm2, %[VIZ]\n\t"
         : [VIX] "=m" (VIX), [VIY] "=m" (VIY), [VIZ] "=m" (VIZ)
         : [dirx] "m" (dirx), [diry] "m" (diry), [dirz] "m" (dirz), [REQSPD] "m" (REQSPD)
         : "xmm0", "xmm1", "xmm2", "xmm3"
     );
     printf("Phase 2.4: Interceptor Velocity Components: (%.2f, %.2f, %.2f)\n",VIX,VIY,VIZ);
+    DBL AX, AY, AZ;
+    asm volatile(
+        "movsd %[VIX], %%xmm0\n\t"
+        "movsd %[VIY], %%xmm1\n\t"
+        "movsd %[VIZ], %%xmm2\n\t"
+        "movsd %[t], %%xmm3\n\t"
+        "movsd %[g], %%xmm4\n\t"
+        "divsd %%xmm3, %%xmm0\n\t"
+        "divsd %%xmm3, %%xmm1\n\t"
+        "divsd %%xmm3, %%xmm2\n\t"
+        "addsd %%xmm4, %%xmm2\n\t"
+        "movsd %%xmm0, %[AX]\n\t"
+        "movsd %%xmm1, %[AY]\n\t"
+        "movsd %%xmm2, %[AZ]\n\t"
+        : [AX] "=m" (AX), [AY] "=m" (AY), [AZ] "=m" (AZ)
+        : [VIX] "m" (VIX), [VIY] "m" (VIY), [VIZ] "m" (VIZ), [t] "m" (t), [g] "m" (g)
+        : "memory"
+    );
+    printf("Phase 2.5: Interceptor Accelertion: (%.2f, %.2f, %.2f)\n",AX,AY,AZ);
+    DBL mass_current, a_thrust, tt, dt = 0.01;
+    char HIT = 1;
+    while(HIT){
+        asm volatile(
+                "movsd %[tt], %%xmm0\n\t"
+                "movsd %[dt], %%xmm1\n\t"
+                "addsd %%xmm1, %%xmm0\n\t"
+                "movsd %%xmm0, %[tt]\n\t"
+                : [tt] "=m" (tt)
+                : [dt] "m" (dt) 
+                : "xmm0", "xmm1"
+        );
+        if ( t < burnTime ){
+            DBL mass;
+            asm volatile(
+                "movsd %[mass0], %%xmm0\n\t"
+                "movsd %[fuelBurnRT], %%xmm1\n\t"
+                "movsd %[tt], %%xmm2\n\t"
+                "mulsd %%xmm1, %%xmm2\n\t"
+                "subsd %%xmm2, %%xmm0\n\t"
+                "movsd %%xmm0, %[mass]\n\t"
+                : [mass] "=m" (mass)
+                : [mass0] "m" (mass0), [fuelBurnRT] "m" (fuelBurnRT), [tt] "m" (tt)
+                : "xmm0", "xmm1", "xmm2"
+            );
+            DBL VM;
+            asm volatile(
+                "movsd %[VIX], %%xmm0\n\t"
+                "movsd %[VIY], %%xmm1\n\t"
+                "movsd %[VIZ], %%xmm2\n\t"
+                "mulsd %%xmm0, %%xmm0\n\t"
+                "mulsd %%xmm1, %%xmm1\n\t"
+                "mulsd %%xmm2, %%xmm2\n\t"
+                "addsd %%xmm1, %%xmm0\n\t"
+                "addsd %%xmm2, %%xmm0\n\t"
+                "sqrtsd %%xmm0, %%xmm0\n\t"
+                "movsd %%xmm0, %[VM]\n\t"
+                : [VM] "=m" (VM)
+                : [VIX] "m" (VIX), [VIY] "m" (VIY), [VIZ] "m" (VIZ)
+                : "memory"
+            );
+          }
     r0;
 }
 
