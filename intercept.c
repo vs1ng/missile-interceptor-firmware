@@ -103,8 +103,18 @@ int main(int ARGC, char* ARG[]){
             : [rx] "m" (rx), [ry] "m" (ry), [rz] "m" (rz)
             : "xmm0", "xmm1", "xmm2"
     );
-    printf("Phase 2.1: Distance to Target = %.2f",DIST);
-
+    printf("Phase 2.1: Distance to Target = %.2f\n",DIST);
+    DBL REQSPD;
+    asm volatile(
+        "movsd %[DIST], %%xmm0\n\t"
+        "movsd %[t], %%xmm1\n\t"
+        "divsd %%xmm1, %%xmm0\n\t"
+        "movsd %%xmm0, %[REQSPD]\n\t"
+        : [REQSPD] "=m" (REQSPD)
+        : [DIST] "m" (DIST), [t] "m" (t)
+        : "xmm0", "xmm1"
+    );
+    printf("Phase 2.2: Required Speed = %.2f\n",REQSPD);    
     r0;
 }
 
