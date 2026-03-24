@@ -1,3 +1,4 @@
+#include <complex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -7,6 +8,7 @@ typedef double DBL;
 typedef const double ADBL;
 
 ADBL g = 9.81;
+ADBL obt = 0.5;
 
 struct TPosition{
     DBL XI, YI, ZI;
@@ -41,17 +43,49 @@ int main(int ARGC, char* ARG[]){
     vz = TPTR->tvel.VZ = atof(ARG[6]);
     DBL XT,YT,ZT;
     asm volatile(
-            "mov eax, %[vx]\n\t"
-            "imul eax,%[t]\n\t"
-            "add eax,%[xi]\n\t"
-            "mov %[XT],eax\n\t"
-            : [XT] "+r" (XT)
-            : [vx] "r" (vx), 
-              [t] "r" (t),
-              [xi] "r" (xi)
-            : "eax"
+            "movsd xmm0, %[vx]\n\t"
+            "movsd xmm1, %[t]\n\t"
+            "mulsd xmm0, xmm1\n\t"
+            "movsd xmm1, %[xi]\n\t"
+            "addsd xmm0, xmm1\n\t"
+            "movsd xmm0, %[XT]\n\t"
+            : [XT] "=m" (XT)
+            : [vx] "m" (vx), [t] "m" (t), [xi] "m" (xi)
+       
+            : "xmm0", "xmm1", "memory"
     );
+    asm volatile(
+            "movsd xmm0, %[vy]\n\t"
+            "movsd xmm1, %[t]\n\t"
+            "mulsd xmm0, xmm1\n\t"
+            "movsd xmm1, %[yi]\n\t"
+            "addsd xmm0, xmm1\n\t"
+            "movsd xmm0, %[YT]\n\t"
+            : [YT] "=m" (YT)
+            : [vy] "m" (vy), [t] "m" (t), [yi] "m" (yi)
+            : "xmm1", "xmm0", "memory"
+     );
+    asm volatile(
+            "movsd xmm0, %[vz]\n\t"
+            "movsd xmm1, %[t]\n\t"
+            "mulsd xmm0, xmm1\n\t"
+            "movsd xmm1, %[zi]\n\t"
+            "addsd xmm0, xmm1\n\t"
 
+            "movsd xmm2, %[t]\n\t"
+            "mulsd xmm2, xmm2\n\t"
+            "movsd xmm3, %[g]\n\t"
+            "mulsd xmm2, xmm3\n\t"
+            "movsd xmm3, %[obt]\n\t"
+            "mulsd xmm2, xmm3\n\t"
+
+            "subsd xmm0,xmm2\n\t"
+
+            "movsd xmm0, %[ZT]\n\t"
+            : [ZT] "=m" (ZT)
+            : [vz] "m" (vz), [t] "m" (t), [zi] "m" (zi), [g] "m" (g), [obt] "m" (obt)
+            : "xmm1" , "xmm0", "memory"
+     );
 
     r0;
 }
