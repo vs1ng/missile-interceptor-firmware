@@ -51,7 +51,7 @@ int main(int ARGC, char* ARG[]){
         "movsd %%xmm0, %[XT]\n\t"
         : [XT] "=m" (XT)
         : [vx] "m" (vx), [t] "m" (t), [xi] "m" (xi)
-        : "xmm0", "xmm1", "memory"
+        : "xmm0", "xmm1"
     );
 
     asm volatile(
@@ -63,7 +63,7 @@ int main(int ARGC, char* ARG[]){
         "movsd %%xmm0, %[YT]\n\t"
         : [YT] "=m" (YT)
         : [vy] "m" (vy), [t] "m" (t), [yi] "m" (yi)
-        : "xmm0", "xmm1", "memory"
+        : "xmm0", "xmm1"
     );
 
     asm volatile(
@@ -83,7 +83,7 @@ int main(int ARGC, char* ARG[]){
         : [ZT] "=m" (ZT)
         : [vz] "m" (vz), [t] "m" (t), [zi] "m" (zi), 
           [g] "m" (g), [obt] "m" (obt)
-        : "xmm0", "xmm1", "xmm2", "memory"
+        : "xmm0", "xmm1", "xmm2"
     );
     printf("Phase 1: Target X:\040%.2f\tY:\040%.2f\tZ:\040%.2f\t\n",XT,YT,ZT);
     DBL rx = XT; DBL ry = YT; DBL rz = ZT;
@@ -114,7 +114,24 @@ int main(int ARGC, char* ARG[]){
         : [DIST] "m" (DIST), [t] "m" (t)
         : "xmm0", "xmm1"
     );
-    printf("Phase 2.2: Required Speed = %.2f\n",REQSPD);    
+    printf("Phase 2.2: Required Speed = %.2f\n",REQSPD);
+    DBL dirx, diry, dirz;
+    asm volatile(
+        "movsd %[rx], %%xmm0\n\t"
+        "movsd %[ry], %%xmm1\n\t"
+        "movsd %[rz], %%xmm2\n\t"
+        "movsd %[DIST], %%xmm3\n\t"
+        "divsd %%xmm3, %%xmm0\n\t"
+        "divsd %%xmm3, %%xmm1\n\t"
+        "divsd %%xmm3, %%xmm2\n\t"
+        "movsd %%xmm0, %[dirx]\n\t"
+        "movsd %%xmm1, %[diry]\n\t"
+        "movsd %%xmm2, %[dirz]\n\t"
+        : [dirx] "=m" (dirx), [diry] "=m" (diry), [dirz] "=m" (dirz)
+        : [rx] "m" (rx), [ry] "m" (ry), [rz] "m" (rz), [DIST] "m" (DIST)
+        : "xmm0", "xmm1", "xmm2", "xmm3" 
+    );
+    printf("Phase 2.3: Direction Vector: %.2fi+%.2fj+%.2fk\n",dirx,diry,dirz);
     r0;
 }
 
