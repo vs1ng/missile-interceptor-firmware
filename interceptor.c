@@ -42,7 +42,7 @@ DBL distance(DBL X1,DBL X2, DBL Y1, DBL Y2){
 
 int main(int A_C, char* A_G[]){
     srand(time(NULL));
-    double t = (int)rand()%(10-3+1)+3;
+    double t = (int)rand()%(5-2+1)+2;
     if (A_C != 10){
         printf("Needed 7 args, got %i instead. Try again.\n",A_C);
         exit(EXIT_FAILURE);
@@ -72,7 +72,7 @@ int main(int A_C, char* A_G[]){
     DBL avX = (MINFO->P_1.x1+MINFO->P_2.x2)/2;
     DBL axY = (MINFO->P_1.y1+MINFO->P_2.y2)/2;
     DBL axZ = (MINFO->P_1.z1+MINFO->P_2.z2)/2;
-    for(int T = (int)ceil(t); T < 40 ; T++){
+    for(int T = (int)floor(t); T < 40 ; T++){
         DBL value = interceptEqn(T,avX, axY, axZ, MINFO->V.vx, MINFO->V.vy, MINFO->V.vz, 300);
         printf("T=%i\tValue=%f\n",T,value);
         if(value > 0){
