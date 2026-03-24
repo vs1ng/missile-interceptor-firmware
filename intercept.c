@@ -30,7 +30,7 @@ int main(int ARGC, char* ARG[]){
     signal(SIGSEGV,segfaultrep);
     struct Target T;
     struct Target* TPTR = &T;
-    if (ARGC != 6){
+    if (ARGC != 7){
         printf("6 args needed, %i were given.",ARGC);
         raise(SIGTERM);
     }
@@ -43,49 +43,67 @@ int main(int ARGC, char* ARG[]){
     vz = TPTR->tvel.VZ = atof(ARG[6]);
     DBL XT,YT,ZT;
     asm volatile(
-            "movsd xmm0, %[vx]\n\t"
-            "movsd xmm1, %[t]\n\t"
-            "mulsd xmm0, xmm1\n\t"
-            "movsd xmm1, %[xi]\n\t"
-            "addsd xmm0, xmm1\n\t"
-            "movsd xmm0, %[XT]\n\t"
-            : [XT] "=m" (XT)
-            : [vx] "m" (vx), [t] "m" (t), [xi] "m" (xi)
-       
-            : "xmm0", "xmm1", "memory"
+        "movsd %[vx], %%xmm0\n\t"
+        "movsd %[t], %%xmm1\n\t"
+        "mulsd %%xmm1, %%xmm0\n\t"
+        "movsd %[xi], %%xmm1\n\t"
+        "addsd %%xmm1, %%xmm0\n\t"
+        "movsd %%xmm0, %[XT]\n\t"
+        : [XT] "=m" (XT)
+        : [vx] "m" (vx), [t] "m" (t), [xi] "m" (xi)
+        : "xmm0", "xmm1", "memory"
     );
+
     asm volatile(
-            "movsd xmm0, %[vy]\n\t"
-            "movsd xmm1, %[t]\n\t"
-            "mulsd xmm0, xmm1\n\t"
-            "movsd xmm1, %[yi]\n\t"
-            "addsd xmm0, xmm1\n\t"
-            "movsd xmm0, %[YT]\n\t"
-            : [YT] "=m" (YT)
-            : [vy] "m" (vy), [t] "m" (t), [yi] "m" (yi)
-            : "xmm1", "xmm0", "memory"
-     );
+        "movsd %[vy], %%xmm0\n\t"
+        "movsd %[t], %%xmm1\n\t"
+        "mulsd %%xmm1, %%xmm0\n\t"
+        "movsd %[yi], %%xmm1\n\t"
+        "addsd %%xmm1, %%xmm0\n\t"
+        "movsd %%xmm0, %[YT]\n\t"
+        : [YT] "=m" (YT)
+        : [vy] "m" (vy), [t] "m" (t), [yi] "m" (yi)
+        : "xmm0", "xmm1", "memory"
+    );
+
     asm volatile(
-            "movsd xmm0, %[vz]\n\t"
-            "movsd xmm1, %[t]\n\t"
-            "mulsd xmm0, xmm1\n\t"
-            "movsd xmm1, %[zi]\n\t"
-            "addsd xmm0, xmm1\n\t"
-
-            "movsd xmm2, %[t]\n\t"
-            "mulsd xmm2, xmm2\n\t"
-            "movsd xmm3, %[g]\n\t"
-            "mulsd xmm2, xmm3\n\t"
-            "movsd xmm3, %[obt]\n\t"
-            "mulsd xmm2, xmm3\n\t"
-
-            "subsd xmm0,xmm2\n\t"
-
-            "movsd xmm0, %[ZT]\n\t"
-            : [ZT] "=m" (ZT)
-            : [vz] "m" (vz), [t] "m" (t), [zi] "m" (zi), [g] "m" (g), [obt] "m" (obt)
-            : "xmm1" , "xmm0", "memory"
-     );
+        "movsd %[vz], %%xmm0\n\t"
+        "movsd %[t], %%xmm1\n\t"
+        "mulsd %%xmm1, %%xmm0\n\t"      
+        "movsd %[zi], %%xmm1\n\t"
+        "addsd %%xmm1, %%xmm0\n\t"      
+        "movsd %[t], %%xmm1\n\t"
+        "mulsd %%xmm1, %%xmm1\n\t"     
+        "movsd %[g], %%xmm2\n\t"
+        "mulsd %%xmm2, %%xmm1\n\t"      
+        "movsd %[obt], %%xmm2\n\t"
+        "mulsd %%xmm2, %%xmm1\n\t"      
+        "subsd %%xmm1, %%xmm0\n\t"      
+        "movsd %%xmm0, %[ZT]\n\t"
+        : [ZT] "=m" (ZT)
+        : [vz] "m" (vz), [t] "m" (t), [zi] "m" (zi), 
+          [g] "m" (g), [obt] "m" (obt)
+        : "xmm0", "xmm1", "xmm2", "memory"
+    );
+    printf("Phase 1: Target X:\040%.2f\tY:\040%.2f\tZ:\040%.2f\t\n",XT,YT,ZT);
+    DBL rx = XT; DBL ry = YT; DBL rz = ZT;
+    DBL DIST = 0;
+    asm volatile(
+            "movsd %[rx], %%xmm0\n\t"
+            "mulsd %%xmm0, %%xmm0\n\t"
+            "movsd %[ry], %%xmm1\n\t"
+            "mulsd %%xmm1, %%xmm1\n\t"
+            "movsd %[rz], %%xmm2\n\t"
+            "mulsd %%xmm2, %%xmm2\n\t"
+            "addsd %%xmm0, %%xmm1\n\t"
+            "addsd %%xmm0, %%xmm2\n\t"
+            "sqrtsd %%xmm0, %%xmm0\n\t"
+            "movsd %%xmm0, %[DIST]\n\t"
+            : [DIST] "=m" (DIST)
+            : [rx] "m" (rx), [ry] "m" (ry), [rz] "m" (rz)
+            : "xmm0", "xmm1", "xmm2"
+    );
+    printf("Phase 2.1: Distance to Target = %.2f",DIST);
 
     r0;
 }
