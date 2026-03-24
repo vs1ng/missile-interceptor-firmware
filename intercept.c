@@ -132,6 +132,23 @@ int main(int ARGC, char* ARG[]){
         : "xmm0", "xmm1", "xmm2", "xmm3" 
     );
     printf("Phase 2.3: Direction Vector: %.2fi+%.2fj+%.2fk\n",dirx,diry,dirz);
+    DBL VIX, VIY, VIZ;
+    asm volatile(
+        "movsd %[dirx], %%xmm0\n\t"
+        "movsd %[diry], %%xmm1\n\t"
+        "movsd %[dirz], %%xmm2\n\t"
+        "movsd %[REQSPD], %%xmm3\n\t"
+        "mulsd %%xmm3, %%xmm0\n\t"
+        "mulsd %%xmm3, %%xmm1\n\t"
+        "mulsd %%xmm3, %%xmm2\n\t"
+        "movsd %%xmm0, %[VIX]\n\t"
+        "movsd %%xmm0, %[VIY]\n\t"
+        "movsd %%xmm0, %[VIZ]\n\t"
+        : [VIX] "=m" (VIX), [VIY] "=m" (VIY), [VIZ] "=m" (VIZ)
+        : [dirx] "m" (dirx), [diry] "m" (diry), [dirz] "m" (dirz), [REQSPD] "m" (REQSPD)
+        : "xmm0", "xmm1", "xmm2", "xmm3"
+    );
+    printf("Phase 2.4: Interceptor Velocity Components: (%.2f, %.2f, %.2f)\n",VIX,VIY,VIZ);
     r0;
 }
 
