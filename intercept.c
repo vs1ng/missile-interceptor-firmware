@@ -11,6 +11,9 @@ ADBL g = 9.81;
 ADBL obt = 0.5;
 ADBL mass0 = 90; 
 ADBL fuelBurnRT = 2.3;
+ADBL rho = 1.225;
+ADBL Cd = 0.5;
+ADBL A = 0.02;
 char burnTime = 5;
 
 struct TPosition{
@@ -212,6 +215,35 @@ int main(int ARGC, char* ARG[]){
                 : [VIX] "m" (VIX), [VIY] "m" (VIY), [VIZ] "m" (VIZ)
                 : "memory"
             );
+            DBL fx, fy, fz;
+            asm volatile(
+                "movsd %[VM], %%xmm0\n\t"
+                "movsd %[VIX], %%xmm1\n\t"
+                "divsd %%xmm0, %%xmm1\n\t"
+                "movsd %[VIY], %%xmm2\n\t"
+                "divsd %%xmm0, %%xmm2\n\t"
+                "movsd %[VIZ], %%xmm3\n\t"
+                "divsd %%xmm0, %%xmm3\n\t"
+                "movsd %%xmm1, %[fx]\n\t"
+                "movsd %%xmm2, %[fy]\n\t"
+                "movsd %%xmm3, %[fz]\n\t"
+                : [fx] "=m" (fx), [fy] "=m" (fy), [fz] "=m" (fz)
+                : [VM] "m" (VM), [VIX] "m" (VIX), [VIY] "m" (VIY), [VIZ] "m" (VIZ)
+                : "memory"
+           );
+           DBL Mach;
+           asm volatile(
+                "movsd %[VM], %%xmm0\n\t"
+                "movsd 343,%%xmm1\n\t"
+                "divsd %%xmm1, %%xmm0\n\t"
+                "movsd %%xmm0, %[Mach]\n\t"
+                : [Mach] "=m" (Mach)
+                : [VM] "m" (VM)
+                : "xmm0", "xmm1"
+           );
+           DBL Fdrag;
+           asm volatile(
+                "movsd 
           }
     r0;
 }
