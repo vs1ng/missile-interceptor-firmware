@@ -243,7 +243,27 @@ int main(int ARGC, char* ARG[]){
            );
            DBL Fdrag;
            asm volatile(
-                "movsd 
+                "movsd %[rho], %%xmm0\n\t"
+                "movsd %[Cd], %%xmm1\n\t"
+                "movsd %[A], %%xmm2\n\t"
+                "movsd %[VM], %%xmm3\n\t"
+                "mulsd %%xmm1, %%xmm0\n\t"
+                "mulsd %%xmm2, %%xmm0\n\t"
+                "mulsd %%xmm3, %%xmm3\n\t"
+                "mulsd %%xmm3, %%xmm0\n\t"
+                "movsd %[obt], %%xmm1\n\t"
+                "mulsd %%xmm1, %%xmm0\n\t"
+                "movsd %%xmm0, %[Fdrag]\n\t"
+                : [Fdrag] "=m" (Fdrag)
+                : [rho] "m" (rho), [Cd] "m" (Cd), [A] "m" (A), [VM] "m" (VM), [obt] "m" (obt)
+                : "memory"
+           );
+           DBL adrag;
+           DBL MC = mass_current;
+           asm volatile(
+               "movsd %[Fdrag], %%xmm0\n\t"
+               "movsd %[MC], %%xmm1\n\t"
+
           }
     r0;
 }
