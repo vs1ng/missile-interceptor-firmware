@@ -304,6 +304,23 @@ int main(int ARGC, char* ARG[]){
           DBL Integrated_Y = ((Flift/(MC*VM))-(g/VM)*(cos(gamma)));
           DBL Integrated_X = VM*cos(gamma);
           DBL Integrated_Z = VM*sin(gamma);
+          DBL anet = 0; DBL dt = t; DBL athr = a_thrust;  
+          asm volatile(
+              "movsd %[VM], %%xmm0\n\t"
+              "movsd %[alift], %%xmm1\n\t"
+              "movsd %[adrag], %%xmm2\n\t"
+              "movsd %[athr], %%xmm3\n\t"
+              "addsd %%xmm1, %%xmm4\n\t"
+              "addsd %%xmm2, %%xmm4\n\t"
+              "addsd %%xmm3, %%xmm4\n\t"
+              "movsd %[dt], %%xmm5\n\t"
+              "mulsd %%xmm5, %%xmm4\n\t"
+              "addsd %%xmm4, %%xmm0\n\t"
+              "movsd %%xmmm0, %[VM]\n\t"
+              : [VM] "=m" (VM)
+              : [alift] "m" (alift), [adrag] "m" (adrag), [athr] "m" (athr)
+              : "xmm0",  "xmm1", "xmm2", "xmm3", "xmm4", "xmm5"
+            );
           }
     r0;
 }
