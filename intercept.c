@@ -1,4 +1,5 @@
 #include <complex.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -12,6 +13,7 @@ ADBL obt = 0.5;
 ADBL mass0 = 90; 
 ADBL fuelBurnRT = 2.3;
 ADBL rho = 1.225;
+ADBL Cl = 0.5;
 ADBL Cd = 0.5;
 ADBL A = 0.02;
 char burnTime = 5;
@@ -263,7 +265,45 @@ int main(int ARGC, char* ARG[]){
            asm volatile(
                "movsd %[Fdrag], %%xmm0\n\t"
                "movsd %[MC], %%xmm1\n\t"
-
+               "movsd %[VM], %%xmm2\n\t"
+               "movsd 0xFFFF, %%xmm3\n\t"
+               "mulsd %%xmm3, %%xmm0\n\t"
+               "divsd %%xmm1, %%xmm0\n\t"
+               "mulsd %%xmm0, %%xmm2\n\t"
+               "movsd %%xmm2, %[adrag]\n\t"
+               : [adrag] "=m" (adrag)
+               : [Fdrag] "m" (Fdrag), [MC] "m" (MC), [VM] "m" (VM)
+               : "memory"
+            );
+           DBL Flift, alift;
+           asm volatile(
+               "movsd %[obt], %%xmm0\n\t"
+               "movsd %[rho], %%xmm1\n\t"
+               "movsd %[A], %%xmm2\n\t"
+               "movsd %[VM], %%xmm3\n\t"
+               "movsd %[Cl], %%xmm4\n\t"
+               "mulsd %%xmm3, %%xmm3\n\t"
+               "mulsd %%xmm4, %%xmm3\n\t"
+               "mulsd %%xmm2, %%xmm3\n\t"
+               "mulsd %%xmm1, %%xmm3\n\t"
+               "mulsd %%xmm0, %%xmm3\n\t"
+               "movsd %%xmm3, %[Flift]\n\t"
+               "xorsd %%xmm0, %%xmm0\n\t"
+               "xorsd %%xmm1, %%xmm1\n\t"
+               "xorsd %%xmm2, %%xmm2\n\t"
+               "xorsd %%xmm4, %%xmm4\n\t"
+               "movsd %[MC], %%xmm2\n\t"
+               "divsd %%xmm2, %%xmm3\n\t"
+               "movsd %%xmm3, %[alift]\n\t"
+               : [Flift] "=m" (Flift), [alift] "=m" (alift)
+               : [obt] "m" (obt), [rho] "m" (rho), [A] "m" (A), [VM] "m" (VM), [Cl] "m" (Cl), [MC] "m" (MC)
+               : "memory"
+            );
+          DBL gamma = M_PI/2;
+          DBL Integrated_V = (((Flift - Fdrag)/MC)-(g)*(sin(gamma))*t);
+          DBL Integrated_Y = ((Flift/(MC*VM))-(g/VM)*(cos(gamma)));
+          DBL Integrated_X = VM*cos(gamma);
+          DBL Integrated_Z = VM*sin(gamma);
           }
     r0;
 }
