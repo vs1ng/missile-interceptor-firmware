@@ -3,6 +3,23 @@
 #include <stdlib.h>
 #define r0 return 0
 typedef double DBL;
+typedef const double CD;
+
+CD g = 9.18;
+CD dt = 0.01;
+CD N = 4;
+CD burn_time = 3.0;
+CD mass_i = 80;
+CD fuel_mass = 20;
+CD thrust = 4000;
+CD rho = 1.225;
+CD Cd = 0.5;
+CD A = 0.02;
+const char hit_r = 3;
+DBL max_turn = (30)*(g);
+DBL fuel_rt = fuel_mass/burn_time;
+DBL dry_mass = mass_i-fuel_mass;
+
 
 struct Threat{
     DBL X0, Y0, Z0;
@@ -26,5 +43,7 @@ int main(int ARGC, char* ARG[]){
     T.X0 = atof(ARG[4]);
     T.Y0 = atof(ARG[5]);
     T.Z0 = atof(ARG[6]);
+    DBL t = 2;
+
     r0;
 }
