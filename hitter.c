@@ -87,6 +87,8 @@ int main(int ARGC, char* ARG[]){
     T.Z0 = atof(ARG[6]);
     DBL t = 2;
 
-    DBL xt = T.X0 
+    DBL xt = add(T.X0,mul(T.VX0,t));
+    DBL yt = add(T.Y0,mul(T.VY0,t));
+    DBL zt = sub(add(T.Z0,mul(T.VZ0,t)),mul(mul(0.5,g),mul(t,t)));
     r0;
 }
