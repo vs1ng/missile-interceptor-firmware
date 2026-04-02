@@ -20,6 +20,47 @@ DBL max_turn = (30)*(g);
 DBL fuel_rt = fuel_mass/burn_time;
 DBL dry_mass = mass_i-fuel_mass;
 
+double add(double A, double B){
+    DBL res;
+    asm volatile(
+            "movsd %[A], %%xmm0\n\t"
+            "movsd %[B], %%xmm1\n\t"
+            "addsd %%xmm1, %%xmm0\n\t"
+            "movsd %%xmm0, %[res]\n\t"
+            : [res] "=m" (res)
+            : [A] "m" (A), [B] "m" (B)
+            : "xmm0", "xmm1"
+    );
+    return res;
+}
+
+double sub(double A, double B){
+    DBL res;
+    asm volatile(
+            "movsd %[A], %%xmm0\n\t"
+            "movsd %[B], %%xmm1\n\t"
+            "subsd %%xmm1, %%xmm0\n\t"
+            "movsd %%xmm0, %[res]\n\t"
+            : [res] "=m" (res)
+            : [A] "m" (A), [B] "m" (B)
+            : "xmm0", "xmm1"
+    );
+    return res;
+}
+
+double mul(double A, double B){
+    DBL res;
+    asm volatile(
+            "movsd %[A], %%xmm0\n\t"
+            "movsd %[B], %%xmm1\n\t"
+            "mulsd %%xmm1, %%xmm0\n\t"
+            "movsd %%xmm0, %[res]\n\t"
+            : [res] "=m" (res)
+            : [A] "m" (A), [B] "m" (B)
+            : "xmm0", "xmm1"
+    );
+    return res;
+}
 
 struct Threat{
     DBL X0, Y0, Z0;
@@ -37,6 +78,7 @@ int main(int ARGC, char* ARG[]){
     if (ARGC != 7){
         printf("Needed 7 args, got %i instead.\n",ARGC);
         raise(SIGTERM);
+    }
     T.VX0 = atof(ARG[1]);
     T.VY0 = atof(ARG[2]);
     T.VZ0 = atof(ARG[3]);
@@ -45,5 +87,6 @@ int main(int ARGC, char* ARG[]){
     T.Z0 = atof(ARG[6]);
     DBL t = 2;
 
+    DBL xt = T.X0 
     r0;
 }
