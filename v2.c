@@ -158,6 +158,12 @@ int main(int ARGC, char* ARG[]){
                 sub(*(PosT+2),*(PosM+2))
             };
             DBL R = normalize(&r[0]);
+            DBL v[3] = {
+                sub(*(VelT+0),*(VelM+0)),
+                sub(*(VelT+1),*(VelM+1)),
+                sub(*(VelT+2),*(VelM+2))
+            };
+            DBL Vclose = divide(add(mul(r[0],v[0]),add(mul(r[1],v[1]),mul(r[2],v[2]))),R);
         } else {
             DBL mass = dry_mass;
             DBL a_thrust = 0;
