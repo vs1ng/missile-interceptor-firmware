@@ -88,6 +88,10 @@ double square_root(double A) {
     return res;
 }
 
+double normalize(double* A){
+    return square_root(mul(*(A+0),*(A+0))+mul(*(A+1),*(A+1))+mul(*(A+2),*(A+2)));
+}
+
 struct Threat{
     DBL X0, Y0, Z0;
     DBL VX0, VY0, VZ0;
@@ -120,10 +124,39 @@ int main(int ARGC, char* ARG[]){
     DBL RY = yt;
     DBL RZ = zt;
     DBL d = square_root(mul(RX,RX)+mul(RY,RY)+mul(RZ,RZ));
-    DBL reqSpeed = d/t;
-    DBL DIRX = RX/d;
-    DBL DIRY = RY/d;
-    DBL DIRZ = RZ/d;
+    DBL reqSpeed = divide(d,t);
+    DBL DIRX = divide(RX,d);
+    DBL DIRY = divide(RY,d);
+    DBL DIRZ = divide(RZ,d);
+    DBL VIX = mul(DIRX,reqSpeed);
+    DBL VIY = mul(DIRY,reqSpeed);
+    DBL VIZ = mul(DIRZ,reqSpeed);
+    DBL AX = divide(VIX,t);
+    DBL AY = divide(VIY,t);
+    DBL AZ = add(divide(VIZ,t),g);
+    DBL PosM[3] = {0,0,0};
+    DBL VelM[3] = {0,0,0};
+    DBL AccM[3] = {AX,AY,AZ};
+    
+    DBL PosT[3] = {T.X0,T.Y0,T.Z0};
+    DBL VelT[3] = {T.VX0,T.VY0,T.Z0};
+    DBL Time = 0;
+    while ( d > hit_r ){
+        Time+=dt;
+        if(Time < burn_time){
+            DBL mass = sub(mass_i,mul(fuel_rt,t));
+            DBL speed = normalize(&VelM[0]);
+            DBL forward[3] = {divide(VIX,speed),divide(VIY,speed),divide(VIZ,speed)};
+            DBL TH2M = divide(thrust,mass);
+            DBL a_thrust[3] = {forward[0]*TH2M,forward[1]*TH2M,forward[2]*TH2M};
+            DBL drag_mag = divide(mul(mul(mul(speed,speed),mul(A,Cd)),mul(0.5,rho)),mass);
+            DBL a_drag = -mul(normalize(&VelM[0]),drag_mag);
+            DBL a_g[3] = {0,0,-g};
 
+        } else {
+            DBL mass = dry_mass;
+            DBL a_thrust = 0;
+        }
+    }
     r0;
 }
