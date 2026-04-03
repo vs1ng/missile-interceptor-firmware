@@ -62,6 +62,32 @@ double mul(double A, double B){
     return res;
 }
 
+double divide(double A, double B){
+    double res;
+    asm volatile(
+            "movsd %[A], %%xmm0\n\t"
+            "movsd %[B], %%xmm1\n\t"
+            "divsd %%xmm1, %%xmm0\n\t"
+            "movsd %%xmm0, %[res]\n\t"
+            : [res] "=m" (res)
+            : [A] "m" (A), [B] "m" (B)
+            : "xmm0", "xmm1"
+     );
+    return res;
+}
+
+double square_root(double A) {
+    double res;
+    asm volatile(
+            "sqrtsd %[A], %%xmm0\n\t"
+            "movsd %%xmm0, %[res]\n\t"
+            : [res] "=m" (res)
+            : [A] "m" (A)
+            : "xmm0"
+    );
+    return res;
+}
+
 struct Threat{
     DBL X0, Y0, Z0;
     DBL VX0, VY0, VZ0;
@@ -90,5 +116,14 @@ int main(int ARGC, char* ARG[]){
     DBL xt = add(T.X0,mul(T.VX0,t));
     DBL yt = add(T.Y0,mul(T.VY0,t));
     DBL zt = sub(add(T.Z0,mul(T.VZ0,t)),mul(mul(0.5,g),mul(t,t)));
+    DBL RX = xt;
+    DBL RY = yt;
+    DBL RZ = zt;
+    DBL d = square_root(mul(RX,RX)+mul(RY,RY)+mul(RZ,RZ));
+    DBL reqSpeed = d/t;
+    DBL DIRX = RX/d;
+    DBL DIRY = RY/d;
+    DBL DIRZ = RZ/d;
+
     r0;
 }
