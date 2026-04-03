@@ -152,7 +152,12 @@ int main(int ARGC, char* ARG[]){
             DBL drag_mag = divide(mul(mul(mul(speed,speed),mul(A,Cd)),mul(0.5,rho)),mass);
             DBL a_drag = -mul(normalize(&VelM[0]),drag_mag);
             DBL a_g[3] = {0,0,-g};
-
+            DBL r[3] = {
+                sub(*(PosT+0),*(PosM+0)),
+                sub(*(PosT+1),*(PosM+1)),
+                sub(*(PosT+2),*(PosM+2))
+            };
+            DBL R = normalize(&r[0]);
         } else {
             DBL mass = dry_mass;
             DBL a_thrust = 0;
