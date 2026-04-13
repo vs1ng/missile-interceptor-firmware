@@ -130,8 +130,6 @@ int main(int ARGC, char* ARG[]){
     DBL RX = xt;
     DBL RY = yt;
     DBL RZ = zt;
-    DBL d = square_root(mul(RX,RX)+mul(RY,RY)+mul(RZ,RZ));
-    DBL reqSpeed = divide(d,t);
     DBL DIRX = divide(RX,d);
     DBL DIRY = divide(RY,d);
     DBL DIRZ = divide(RZ,d);
@@ -144,16 +142,13 @@ int main(int ARGC, char* ARG[]){
     DBL PosM[3] = {0,0,0};
     DBL VelM[3] = {0,0,0};
     DBL AccM[3] = {AX,AY,AZ};
-
     DBL Time = 0;
-    DBL PosM[3] = {0,0,0};
-    DBL VelM[3] = {0,0,0};
-    DBL AccM[3] = {AX, AY, AZ};
-
     DBL PosT[3] = {T.X0, T.Y0, T.Z0};
     DBL VelT[3] = {T.VX0, T.VY0, T.VZ0};
+
     DBL Rel[3] = {sub(PosT[0], PosM[0]), sub(PosT[1], PosM[1]), sub(PosT[2], PosM[2])};
     DBL d = square_root(mul(Rel[0], Rel[0]) + mul(Rel[1], Rel[1]) + mul(Rel[2], Rel[2]));
+    DBL reqSpeed = divide(d,t);
 
     while (d > hit_r) {
         Time = add(Time, dt);
@@ -175,8 +170,8 @@ int main(int ARGC, char* ARG[]){
             forward[2] = divide(DIRZ, 1.0);
         }
         DBL a_thrust[3] = {0,0,0};
-        if (Time < burn_time) {
-            DBL thrust_acc_mag = divide(thrust, mass);
+        if (Time < burn_time) {VelT
+            DBL thrust_acc_mag = divide(thrust, mass);VelT
             a_thrust[0] = mul(forward[0], thrust_acc_mag);
             a_thrust[1] = mul(forward[1], thrust_acc_mag);
             a_thrust[2] = mul(forward[2], thrust_acc_mag);
