@@ -10,10 +10,10 @@ typedef const double CD;
 CD g = 9.81;
 CD dt = 0.01;
 CD N = 4;
-CD burn_time = 3.0;
+CD burn_time = 20.0;
 CD mass_i = 80;
 CD fuel_mass = 20;
-CD thrust = 4000;
+CD thrust = 15000;
 CD rho = 1.225;
 CD Cd = 0.5;
 CD A = 0.02;
@@ -79,8 +79,8 @@ int main(int ARGC, char* ARG[]){
     DBL zt = sub(add(T.Z0, mul(T.VZ0, t_p)), mul(4.9, mul(t_p, t_p)));
     DBL d = square_root(add(mul(xt, xt), mul(zt, zt)));
     
-    VelM[0] = mul(divide(xt, d), 180.0);
-    VelM[2] = mul(divide(zt, d), 180.0);
+    VelM[0] = 150.0; 
+    VelM[2] = 150.0; 
 
     while (d > hit_r && Time < 60.0 && PosM[2] >= -1.0) {
         Time = add(Time, dt);
@@ -140,7 +140,7 @@ int main(int ARGC, char* ARG[]){
 
         printf("%sSTATUS: %-10s TIME: %6.2fs DIST: %8.2fm ALT: %7.1fm VC: %7.1fm/s\033[0m\n", 
                color, status, Time, d, PosM[2], Vc);
-        usleep(5000); 
+        usleep(100); 
     }
 
     r0;
