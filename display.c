@@ -79,8 +79,8 @@ int main(int ARGC, char* ARG[]){
     DBL zt = sub(add(T.Z0, mul(T.VZ0, t_p)), mul(4.9, mul(t_p, t_p)));
     DBL d = square_root(add(mul(xt, xt), mul(zt, zt)));
     
-    VelM[0] = 150.0; 
-    VelM[2] = 150.0; 
+    VelM[0] = 200.0; 
+    VelM[2] = 400.0; 
 
     while (d > hit_r && Time < 60.0 && PosM[2] >= -1.0) {
         Time = add(Time, dt);
@@ -131,6 +131,10 @@ int main(int ARGC, char* ARG[]){
         }
 
         for(int i=0; i<3; i++) {
+        if (PosM[2] < 100.0 && a_tot[2] < 0) {
+            a_tot[2] = g; 
+        }
+        //oh my god bro this better fix the corrections
             VelM[i] = add(VelM[i], mul(a_tot[i], dt));
             PosM[i] = add(PosM[i], mul(VelM[i], dt));
             PosT[i] = add(PosT[i], mul(VelT[i], dt));
